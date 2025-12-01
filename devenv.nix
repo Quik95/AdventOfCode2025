@@ -1,6 +1,10 @@
 { pkgs, lib, config, inputs, ... }:
 
 {
+  packages = with pkgs; [
+      cargo-nextest
+  ];
+
   languages.rust = {
     enable = true;
     channel = "stable"; # or "nightly"
