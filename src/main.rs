@@ -1,112 +1,54 @@
-use nom::branch::alt;
-use nom::character::complete::{char, digit1, line_ending, multispace0};
-use nom::combinator::{map_res, value};
-use nom::multi::separated_list0;
-use nom::sequence::{delimited, pair};
-use nom::{IResult, Parser};
+mod day01;
 
-const INPUT_FILE: &str = include_str!("../inputs/day01/actual.txt");
+use crate::day01::Day01;
+use std::time::{Duration, Instant};
 
 fn main() {
-    let (rest, parsed) = parse_input_file(INPUT_FILE).expect("The input is not valid");
-    assert!(rest.is_empty(), "The input is not fully parsed: {}", rest);
+    let days: Vec<Box<dyn AoCProblem>> = vec![
+        Box::<Day01>::default(),
+    ];
 
-    let (end_state, zero_count) = parsed
-        .iter()
-        .fold((50, 0), |(state, zero_counts), &rotation| {
-            let adjusted_rotation = if rotation.abs() > 99 {
-                (rotation.abs() % 100) * rotation.signum()
-            } else {
-                rotation
-            };
+    let n_days = days.len();
+    let total_duration = days.into_iter()
+        .fold(Duration::from_secs(0), |acc, mut day| acc + day.print_solution());
 
-            let next_state_temp = state + adjusted_rotation;
-            let next_state = if next_state_temp < 0 {
-                100 - next_state_temp.abs()
-            } else if next_state_temp >= 100 {
-                next_state_temp - 100
-            } else {
-                next_state_temp
-            };
-
-            (
-                next_state,
-                if next_state == 0 {
-                    zero_counts + 1
-                } else {
-                    zero_counts
-                },
-            )
-        });
-
-    let (end_state2, zero_count2) =
-        parsed
-            .iter()
-            .fold((50, 0), |(state, zero_counts), &rotation| {
-                let (adjusted_rotation, mut n_fits) = if rotation.abs() > 99 {
-                    (
-                        (rotation.abs() % 100) * rotation.signum(),
-                        rotation.abs() / 100,
-                    )
-                } else {
-                    (rotation, 0)
-                };
-
-                let next_state_temp = state + adjusted_rotation;
-                let next_state = if next_state_temp < 0 {
-                    let tmp = 100 - next_state_temp.abs();
-                    if state != 0 && tmp != 0 {
-                        n_fits += 1;
-                    }
-                    tmp
-                } else if next_state_temp >= 100 {
-                    let tmp = next_state_temp - 100;
-                    if state != 0 && tmp != 0 {
-                        n_fits += 1;
-                    }
-                    tmp
-                } else {
-                    next_state_temp
-                };
-
-                (
-                    next_state,
-                    if next_state == 0 {
-                        zero_counts + 1 + n_fits
-                    } else {
-                        zero_counts + n_fits
-                    },
-                )
-            });
-
-    println!("End state was: {end_state}");
-    println!("Number of times counter was 0: {zero_count}");
-    println!("---------");
-    println!("End state was: {end_state2}");
-    println!("Number of times counter was 0: {zero_count2}");
+    println!("Total time for {n_days} days: {total_duration:?}");
 }
 
-type DialRotation = i32;
+pub trait AoCProblem {
+    fn parse_input(&mut self, input: &str);
+    fn parse_input_default(&mut self);
+    fn solve_part1(&self) -> Option<String>;
+    fn solve_part2(&self) -> Option<String>;
+    fn day_name(&self) -> &'static str;
 
-fn parse_input_file(input: &str) -> IResult<&str, Vec<DialRotation>> {
-    delimited(
-        multispace0,
-        separated_list0(line_ending, parse_line),
-        multispace0,
-    )
-    .parse(input)
-}
+    fn print_solution(&mut self) -> Duration {
+        println!("{}:", self.day_name());
 
-fn parse_sign(input: &str) -> IResult<&str, i32> {
-    alt((value(-1, char('L')), value(1, char('R')))).parse(input)
-}
+        let start = Instant::now();
+        self.parse_input_default();
+        let elapsed_parse = start.elapsed();
+        println!("\tParsing input took: {:?}\n", elapsed_parse);
 
-fn parse_number(input: &str) -> IResult<&str, i32> {
-    map_res(digit1, |s: &str| s.parse::<i32>()).parse(input)
-}
+        let start = Instant::now();
+        let mut elapsed_part1 = Duration::default();
+        if let Some(part_1) = self.solve_part1() {
+            println!("\tPart 1: {}", part_1);
+            elapsed_part1 = start.elapsed();
+            println!("\tPart 1 took: {:?}\n", elapsed_part1);
+        }
 
-fn parse_line(input: &str) -> IResult<&str, DialRotation> {
-    pair(parse_sign, parse_number)
-        .map(|(sign, number)| sign * number)
-        .parse(input)
+        let start = Instant::now();
+        let mut elapsed_part2 = Duration::default();
+        if let Some(part_2) = self.solve_part2() {
+            println!("\tPart 2: {}", part_2);
+            elapsed_part2 = start.elapsed();
+            println!("\tPart 2 took: {:?}\n", elapsed_part2);
+        }
+
+        let total_duration = elapsed_parse + elapsed_part1 + elapsed_part2;
+        println!("\tTotal time: {:?}\n", total_duration);
+
+        total_duration
+    }
 }
