@@ -48,78 +48,25 @@ impl AoCProblem for Day01 {
     }
 
     fn solve_part1(&self) -> Option<String> {
-        let (_, zero_count) =
-            self.rotations
-                .iter()
-                .fold((50, 0), |(state, zero_counts), &rotation| {
-                    let adjusted_rotation = if rotation.abs() > 99 {
-                        (rotation.abs() % 100) * rotation.signum()
-                    } else {
-                        rotation
-                    };
-
-                    let next_state_temp = state + adjusted_rotation;
-                    let next_state = if next_state_temp < 0 {
-                        100 - next_state_temp.abs()
-                    } else if next_state_temp >= 100 {
-                        next_state_temp - 100
-                    } else {
-                        next_state_temp
-                    };
-
-                    (
-                        next_state,
-                        if next_state == 0 {
-                            zero_counts + 1
-                        } else {
-                            zero_counts
-                        },
-                    )
-                });
+        let (_, zero_count) = self.rotations.iter().fold((50, 0), |(pos, count), &rot| {
+            let next_pos = (pos + rot).rem_euclid(100);
+            (next_pos, count + if next_pos == 0 { 1 } else { 0 })
+        });
 
         Some(zero_count.to_string())
     }
 
     fn solve_part2(&self) -> Option<String> {
-        let (_, zero_count) =
-            self.rotations
-                .iter()
-                .fold((50, 0), |(state, zero_counts), &rotation| {
-                    let (adjusted_rotation, mut n_fits) = if rotation.abs() > 99 {
-                        (
-                            (rotation.abs() % 100) * rotation.signum(),
-                            rotation.abs() / 100,
-                        )
-                    } else {
-                        (rotation, 0)
-                    };
+        let (_, zero_count) = self.rotations.iter().fold((50, 0), |(pos, count), &rot| {
+            let passed = if rot > 0 {
+                (pos + rot).div_euclid(100)
+            } else {
+                (pos + 99).div_euclid(100) - (pos + rot + 99).div_euclid(100)
+            };
 
-                    let next_state_temp = state + adjusted_rotation;
-                    let next_state = if next_state_temp < 0 {
-                        let tmp = 100 - next_state_temp.abs();
-                        if state != 0 && tmp != 0 {
-                            n_fits += 1;
-                        }
-                        tmp
-                    } else if next_state_temp >= 100 {
-                        let tmp = next_state_temp - 100;
-                        if state != 0 && tmp != 0 {
-                            n_fits += 1;
-                        }
-                        tmp
-                    } else {
-                        next_state_temp
-                    };
-
-                    (
-                        next_state,
-                        if next_state == 0 {
-                            zero_counts + 1 + n_fits
-                        } else {
-                            zero_counts + n_fits
-                        },
-                    )
-                });
+            let next_pos = (pos + rot).rem_euclid(100);
+            (next_pos, count + passed)
+        });
 
         Some(zero_count.to_string())
     }
