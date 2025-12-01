@@ -8,7 +8,6 @@ use nom::{IResult, Parser};
 
 type DialRotation = i32;
 
-#[derive(Default)]
 pub struct Day01 {
     pub rotations: Vec<DialRotation>,
 }
@@ -29,8 +28,8 @@ fn parse_line(input: &str) -> IResult<&str, DialRotation> {
 
 const PROBLEM_FILE: &str = include_str!("inputs/actual.txt");
 
-impl AoCProblem for Day01 {
-    fn parse_input(&mut self, input: &str) {
+impl Day01 {
+    pub fn new(input: &str) -> Self {
         let (rem, parsed_input) = delimited(
             multispace0,
             separated_list0(line_ending, parse_line),
@@ -40,13 +39,19 @@ impl AoCProblem for Day01 {
         .expect("The input is not valid");
         assert!(rem.is_empty(), "The input is not fully parsed: {}", rem);
 
-        self.rotations = parsed_input;
+        Self {
+            rotations: parsed_input,
+        }
     }
+}
 
-    fn parse_input_default(&mut self) {
-        self.parse_input(PROBLEM_FILE);
+impl Default for Day01 {
+    fn default() -> Self {
+        Self::new(PROBLEM_FILE)
     }
+}
 
+impl AoCProblem for Day01 {
     fn solve_part1(&self) -> Option<String> {
         let (_, zero_count) = self.rotations.iter().fold((50, 0), |(pos, count), &rot| {
             let next_pos = (pos + rot).rem_euclid(100);
@@ -85,15 +90,13 @@ mod tests {
 
     #[test]
     fn test_example_part1() {
-        let mut day = Day01::default();
-        day.parse_input(EXAMPLE_INPUT);
+        let day = Day01::new(EXAMPLE_INPUT);
         assert_eq!(day.solve_part1(), Some("3".into()));
     }
 
     #[test]
     fn test_example_part2() {
-        let mut day = Day01::default();
-        day.parse_input(EXAMPLE_INPUT);
+        let day = Day01::new(EXAMPLE_INPUT);
         assert_eq!(day.solve_part2(), Some("6".into()));
     }
 }

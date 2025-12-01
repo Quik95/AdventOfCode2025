@@ -5,30 +5,24 @@ use std::time::{Duration, Instant};
 
 fn main() {
     let days: Vec<Box<dyn AoCProblem>> = vec![
-        Box::<Day01>::default(),
+        Box::<Day01>::default()
     ];
 
     let n_days = days.len();
-    let total_duration = days.into_iter()
-        .fold(Duration::from_secs(0), |acc, mut day| acc + day.print_solution());
+    let total_duration = days.into_iter().fold(Duration::from_secs(0), |acc, day| {
+        acc + day.print_solution()
+    });
 
     println!("Total time for {n_days} days: {total_duration:?}");
 }
 
 pub trait AoCProblem {
-    fn parse_input(&mut self, input: &str);
-    fn parse_input_default(&mut self);
     fn solve_part1(&self) -> Option<String>;
     fn solve_part2(&self) -> Option<String>;
     fn day_name(&self) -> &'static str;
 
-    fn print_solution(&mut self) -> Duration {
+    fn print_solution(&self) -> Duration {
         println!("{}:", self.day_name());
-
-        let start = Instant::now();
-        self.parse_input_default();
-        let elapsed_parse = start.elapsed();
-        println!("\tParsing input took: {:?}\n", elapsed_parse);
 
         let start = Instant::now();
         let mut elapsed_part1 = Duration::default();
@@ -46,7 +40,7 @@ pub trait AoCProblem {
             println!("\tPart 2 took: {:?}\n", elapsed_part2);
         }
 
-        let total_duration = elapsed_parse + elapsed_part1 + elapsed_part2;
+        let total_duration = elapsed_part1 + elapsed_part2;
         println!("\tTotal time: {:?}\n", total_duration);
 
         total_duration
