@@ -128,3 +128,25 @@ impl AoCProblem for Day01 {
         "Day 1: Secret Entrance"
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use pretty_assertions::assert_eq;
+
+    const EXAMPLE_INPUT: &str = include_str!("inputs/example.txt");
+
+    #[test]
+    fn test_example_part1() {
+        let mut day = Day01::default();
+        day.parse_input(EXAMPLE_INPUT);
+        assert_eq!(day.solve_part1(), Some("3".into()));
+    }
+
+    #[test]
+    fn test_example_part2() {
+        let mut day = Day01::default();
+        day.parse_input(EXAMPLE_INPUT);
+        assert_eq!(day.solve_part2(), Some("6".into()));
+    }
+}
