@@ -1,3 +1,4 @@
+use itertools::concat;
 use crate::AoCProblem;
 use nom::branch::alt;
 use nom::character::complete::{char, digit1, line_ending, multispace0};
@@ -26,7 +27,7 @@ fn parse_line(input: &str) -> IResult<&str, DialRotation> {
         .parse(input)
 }
 
-const PROBLEM_FILE: &str = include_str!("inputs/actual.txt");
+const PROBLEM_FILE: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/inputs/day01/actual.txt"));
 
 impl Day01 {
     pub fn new(input: &str) -> Self {
@@ -86,7 +87,7 @@ mod tests {
     use super::*;
     use pretty_assertions::assert_eq;
 
-    const EXAMPLE_INPUT: &str = include_str!("inputs/example.txt");
+    const EXAMPLE_INPUT: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/inputs/day01/example.txt"));
 
     #[test]
     fn test_example_part1() {

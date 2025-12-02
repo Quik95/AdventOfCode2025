@@ -140,4 +140,4 @@ rust-project.json
 .direnv/
 devenv.local.nix
 .devenv.flake.nix
-src/**/actual.txt
+inputs/**/actual.txt
