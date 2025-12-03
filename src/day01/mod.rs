@@ -1,4 +1,3 @@
-use itertools::concat;
 use crate::AoCProblem;
 use nom::branch::alt;
 use nom::character::complete::{char, digit1, line_ending, multispace0};
