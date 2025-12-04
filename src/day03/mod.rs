@@ -53,32 +53,30 @@ impl BatteryBank {
         let count = self.joltages.len();
         assert!(count > result_length);
 
-        let mut state: Vec<Vec<u64>> = Vec::with_capacity(result_length + 1);
-        state.push(self.joltages.iter().map(|j| *j as u64).collect());
+        let root_layer = &self.joltages;
+        let mut prev_layer = vec![0; count];
+        let mut working_layer = vec![0; count-1];
 
-        state.push(vec![self.joltages[count - 1] as u64; count]);
+        // Build the first layer based on the root layer
+        prev_layer[count - 1] = root_layer[count - 1] as u64;
         for i in (0..count - 1).rev() {
-            state[1][i] = u64::max(self.joltages[i] as u64, state[1][i + 1]);
+            prev_layer[i] = u64::max(root_layer[i] as u64, prev_layer[i + 1]);
         }
 
-        for level in 2..result_length + 1 {
-            let mut new_level = vec![0; count - level + 1];
-            {
-                let (root_level, level_n1) = (&state[0], &state[level - 1]);
+        // Dynamic programming loop
+        for layer_index in 1..result_length {
+            let max_index = count - layer_index - 1;
+            let power = 10u64.pow(layer_index as u32);
+            working_layer[max_index] = root_layer[max_index] as u64 * power + prev_layer[max_index + 1];
 
-                new_level[count - level] =
-                    root_level[count - level] * (10u64.pow((level - 1) as u32)) + level_n1[count - level + 1];
-                for i in (0..new_level.len() - 1).rev() {
-                    let maybe_new_max =
-                        root_level[i] * (10u64.pow((level - 1) as u32)) + level_n1[i + 1];
-                    new_level[i] = u64::max(maybe_new_max, new_level[i + 1]);
-                }
+            for i in (0..max_index).rev() {
+                working_layer[i] = u64::max(root_layer[i] as u64 * power + prev_layer[i + 1], working_layer[i + 1]);
             }
 
-            state.push(new_level);
+            prev_layer[..(max_index + 1)].copy_from_slice(&working_layer[..(max_index + 1)]);
         }
 
-        *state[result_length].iter().max().expect("No valid joltage found")
+        prev_layer[0]
     }
 }
 
