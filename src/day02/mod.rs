@@ -58,12 +58,15 @@ impl AoCProblem for Day02 {
 }
 
 pub fn is_symmetric(id: u64) -> bool {
-    let tmp = id.to_string();
-    if tmp.len() % 2 == 1 {
+    let length = (id.ilog10() + 1) as u64;
+    if length % 2 == 1 {
         return true;
     }
 
-    tmp.get(0..tmp.len() / 2) != tmp.get(tmp.len() / 2..)
+    let low_part = id % (10u64.pow((length / 2) as u32));
+    let high_part = (id - low_part) / (10u64.pow((length / 2) as u32));
+
+    low_part != high_part
 }
 
 fn is_repeating_pattern(id: u64) -> bool {
