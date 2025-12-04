@@ -1,14 +1,17 @@
 mod day01;
 mod day02;
+mod day03;
 
 use crate::day01::Day01;
 use std::time::{Duration, Instant};
 use crate::day02::Day02;
+use crate::day03::Day03;
 
 fn main() {
     let days: Vec<Box<dyn AoCProblem>> = vec![
         Box::<Day01>::default(),
         Box::<Day02>::default(),
+        Box::<Day03>::default(),
     ];
 
     let n_days = days.len();
